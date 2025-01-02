@@ -21,26 +21,64 @@
 
 # thus, the outcome number set is [9, 8, 7, 6, 5, 4, 3, 2, 1]
 # and each game is represented as a number like '012343210'_[987654321], where the subscript describes the variable base
-# essentially, each digit of the permutation # has its own specified base, and all of them are then combined
+# essentially, each digit of the permutation has its own specified base, and all of them are then combined
 
 # the aim is to order the permutations of similar scenarios
 # this allows saying '0th tic-tac-toe game' or '5398th tic-tac-toe game' - indexing of permutations
 # this gives a general way of going through every single permutation
 
+# there are 9 outcomes of the first turn, 8 outcomes of the second turn and so on before no free spaces is left
+# assume the game doesn't end before all spaces are filled
 outcome_numbers = [9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 # find the total number of permutations by multiplying together the outcome # of each independent event
-total_permutations = 1
-for number in outcome_numbers:
-    total_permutations *= number
+def get_total_permutations(outcome_numbers):
+    total_permutations = 1
+    for number in outcome_numbers:
+        total_permutations *= number
+    return total_permutations
 
-# find the weights of each permutation # digit
+# find the weights of each permutation digit
 # e.g., in binary they are [1, 2, 4, 8, 16, ...]
-weights = [1] * len(outcome_numbers)
-for i in range(1, len(weights)):
-    weights[i] = outcome_numbers[i] * weights[i - 1]
+def get_outcome_weights(outcome_numbers):
+    outcome_weights = [1] * len(outcome_numbers)
+    for i in range(1, len(outcome_weights)):
+        outcome_weights[i] = outcome_numbers[i] * outcome_weights[i - 1]
+    return outcome_weights
 
-# weights allow to convert between the permutation number and index
+# weights allow to convert between the permutation and permutation index
 # ... where:
-# permutation number - of a form '123500110'_[987654321]
-# permutation index  – number between 0 and the total number of permutations, referring to a specific one
+# permutation       - of a form '123500110'_[987654321]
+# permutation index – number between 0 and the total number of permutations (excl. it), referring to a specific one
+
+def get_permutation(permutation_index, outcome_weights):
+    permutation = [0] * len(outcome_weights)
+    r = permutation_index
+    for i in range(len(outcome_weights)):
+        index = -1 - i
+        outcome = r // outcome_weights[index]
+        permutation[index] = outcome
+        r -= outcome * outcome_weights[index]
+    return permutation
+
+def get_permutation_index(permutation, outcome_weights):
+    index = 0
+    for i in range(len(outcome_weights)):
+        index += permutation[i] * outcome_weights[i]
+    return index
+
+# get_permutation_index(get_permutation(a, [1, 2, 4, 8]), [1, 2, 4, 8])) == a
+
+total_permutations = get_total_permutations(outcome_numbers)
+outcome_weights = get_outcome_weights(outcome_numbers)
+
+print(f"Total number of ways to fill a tic-tac-toe board is {total_permutations}") # 362880 = 9!
+print(f"Weights of each event are: {outcome_weights}") # 1, 1 * 8, 1 * 8 * 7, 1 * 8 * 7 * 6 ... 
+
+print(f"972nd game of tic-tac-toe is: {get_permutation(972, outcome_weights)}")
+
+# . . .  . . o  . . o  . . o  x . o  x o o  x o o  x o o  x o o
+# . x .  . x .  . x .  o x .  o x .  o x .  o x x  o x x  o x x
+# . . .  . . .  . x .  . x .  . x .  . x .  . x .  o x .  o x x
+# ... which is, conveniently, a win for x on the last turn
+
