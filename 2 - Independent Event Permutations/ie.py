@@ -43,7 +43,7 @@ def get_total_permutations(outcome_numbers):
 def get_outcome_weights(outcome_numbers):
     outcome_weights = [1] * len(outcome_numbers)
     for i in range(1, len(outcome_weights)):
-        outcome_weights[i] = outcome_numbers[i] * outcome_weights[i - 1]
+        outcome_weights[i] = outcome_numbers[i - 1] * outcome_weights[i - 1]
     return outcome_weights
 
 # weights allow to convert between the permutation and permutation index
@@ -76,9 +76,27 @@ print(f"Total number of ways to fill a tic-tac-toe board is {total_permutations}
 print(f"Weights of each event are: {outcome_weights}") # 1, 1 * 8, 1 * 8 * 7, 1 * 8 * 7 * 6 ... 
 
 print(f"972nd game of tic-tac-toe is: {get_permutation(972, outcome_weights)}")
-
 # . . .  . . o  . . o  . . o  x . o  x o o  x o o  x o o  x o o
 # . x .  . x .  . x .  o x .  o x .  o x .  o x x  o x x  o x x
 # . . .  . . .  . x .  . x .  . x .  . x .  . x .  o x .  o x x
 # ... which is, conveniently, a win for x on the last turn
 
+# where else is this useful?
+
+# consider representing a game state with a text string
+# in the game we will have:
+# - a lever on the map (0 - 1)
+# - player's gold (0 - 255)
+# - player's level (1 - 20)
+# - number of items in inventory (0 - 3)
+# ... instead of saving it with a string (i.e., "1255203"), or a contracted one with HEX (i.e., "1FF203"),
+# ... it can be saved as an integer - the permutation # of the four properties
+
+outn = [2, 256, 20, 4] #p's level is stored (0 - 19) and then converted to (1 - 20)
+prms = get_total_permutations(outn) # 40960
+outw = get_outcome_weights(outn)
+
+print(get_permutation_index([1, 255, 19, 3], outw)) # this is one less than total permutations - highest values
+
+# this compresses the previous number 0x1FF203 to 0x9FFF
+# it is the most efficient way to store the game state!
