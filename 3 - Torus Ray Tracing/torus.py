@@ -131,4 +131,6 @@ while(True):
     # clear()
     draw_console()
     time.sleep(0.01)
+
+# try with resh = 300
 # draw_squence(24)
