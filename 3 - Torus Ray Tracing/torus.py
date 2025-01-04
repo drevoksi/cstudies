@@ -46,9 +46,10 @@ class Torus:
         direction = normalise(direction)
         for i in range(20):
             sd, d = self.sd(point)
-            if dotp(d, direction) < 0 and sd > self.R:
+            if (dotp(d, direction) < 0 or sd < 0) and dotp(direction, sub(vzero, point)) < 0:
                 return None
-            point = add(point, multiply(direction, sd))
+            if sd > 0.0001:
+                point = add(point, multiply(direction, sd))
         return point
 
 # ray trace the image
@@ -60,17 +61,22 @@ resv = resh * 3 // 4
 torus = Torus(1, 0.4)
 light = (1, 1, -1)
 angles = (0, 0, 0)
+pos = (-6, 0, 0)
 rotation = (26, 39, -7)
 
 for i in range(360 // 26):
     img = Image.new(mode="RGBA", size=(resh, resv))
     for py in range(resh):
         for pz in range(resv):
-            y, z = (py / resh * 2 - 1, (pz * 2 - resv) / resh)
-            intersection = torus.cast(rotate((-6, 0, 0), angles), rotate((1, y, z), angles))
+            y, z = (py / resh * 2 - 1, (resv - pz * 2) / resh)
+            intersection = torus.cast(rotate(pos, angles), rotate((1, y, z), angles))
             color = (45, 45, 45)
             if intersection != None:
-                color = multiply((255, 255, 255), -dotp(rotate(light, angles), torus.n(intersection)))
+                l = -dotp(rotate(light, angles), torus.n(intersection))
+                int2 = torus.cast(intersection, rotate(sub(vzero, light), angles))
+                if int2 != None and magnitude(sub(intersection, int2)) > 0.1: l = -4
+                color = multiply((255, 255, 255), max(l, 0.1))
+                if l == -4: color = (255, 0, 0)
             img.putpixel((py, pz), vint(color))
     # img.show()
     img.save(f"frames/frame{i}.png","PNG")
