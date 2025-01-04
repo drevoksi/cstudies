@@ -2,6 +2,8 @@
 # surface of a torus is fixed distance r from that point
 # the simplified expresion turns out to be (√(x^2 + y^2) - R)^2 + z^2 = r^2
 
+# vector algebra
+
 import math
 
 def magnitude(v):
@@ -29,6 +31,9 @@ def rotate(v, euler_angles):
         (-s(y)) * v[0] + (c(y) * s(x)) * v[1] + (c(y) * c(x)) * v[2]
     )
 vzero = (0, 0, 0)
+vone = (1, 1, 1)
+
+# torus raycast
 
 class Torus:
     def __init__(self, R, r):
@@ -44,40 +49,86 @@ class Torus:
         return normalise(multiply(self.d(point), -1))
     def cast(self, point, direction):
         direction = normalise(direction)
-        for i in range(20):
+        point = add(point, multiply(direction, 0.05))
+        for i in range(30):
             sd, d = self.sd(point)
-            if (dotp(d, direction) < 0 or sd < 0) and dotp(direction, sub(vzero, point)) < 0:
+            cos = dotp(direction, normalise(d))
+            if cos < 0 and sd > 2 * self.R:
                 return None
-            if sd > 0.0001:
-                point = add(point, multiply(direction, sd))
+            point = add(point, multiply(direction, sd))
         return point
 
-# ray trace the image
+# image ray tracing
 
-from PIL import Image
-
-resh = 300
+resh = 80
 resv = resh * 3 // 4
 torus = Torus(1, 0.4)
-light = (1, 1, -1)
+light = normalise((1, 1, -1))
 angles = (0, 0, 0)
-pos = (-6, 0, 0)
-rotation = (26, 39, -7)
+rotation = (11, 17, -3)
+pos = (-3.5, 0, 0)
 
-for i in range(360 // 26):
-    img = Image.new(mode="RGBA", size=(resh, resv))
+def gen_image():
+    global angles
+    arr = [[None] * resv for i in range(resh)]
     for py in range(resh):
         for pz in range(resv):
             y, z = (py / resh * 2 - 1, (resv - pz * 2) / resh)
             intersection = torus.cast(rotate(pos, angles), rotate((1, y, z), angles))
-            color = (45, 45, 45)
+            color = multiply(vone, 0.125)
             if intersection != None:
                 l = -dotp(rotate(light, angles), torus.n(intersection))
-                int2 = torus.cast(intersection, rotate(sub(vzero, light), angles))
-                if int2 != None and magnitude(sub(intersection, int2)) > 0.1: l = -4
-                color = multiply((255, 255, 255), max(l, 0.1))
-                if l == -4: color = (255, 0, 0)
-            img.putpixel((py, pz), vint(color))
-    # img.show()
-    img.save(f"frames/frame{i}.png","PNG")
+                if torus.cast(intersection, rotate(sub(vzero, light), angles)) != None: l = 0
+                color = multiply((1, 1, 1), max(l, 0.4))
+            arr[py][pz] = color
     angles = add(angles, rotation)
+    return arr
+
+# image sequence draw and save
+
+from PIL import Image
+
+def draw_squence(n):
+    for i in range(n):
+        img = Image.new(mode="RGBA", size=(resh, resv))
+        arr = gen_image()
+        for x in range(len(arr)):
+            for y in range(len(arr[x])):
+                img.putpixel((x, y), vint(multiply(arr[x][y], 255)))
+        # img.show()
+        img.save(f"frames/frame{i}.png","PNG")
+
+# console draw
+
+from random import random
+import time
+import os
+clear = lambda: os.system('clear')
+
+def draw_console():
+    arr = gen_image()
+    out = ""
+    for y in range(len(arr[0]) // 3):
+        for x in range(len(arr) // 2):
+            values = []
+            for ax in range(2):
+                for ay in range(3):
+                    values.append(arr[x * 2 + ax][y * 3 + ay][0])
+            var = 0
+            pow = 1
+            for i in range(len(values)):
+                value = values[i]
+                if value != 0 and ((x * 2 + y * 3 + i) % int(1 / value)) == 0:
+                    var += pow
+                pow <<= 1
+            out += chr(0x2800 + var)
+        out += "\n"
+    print(out)
+
+# main
+
+while(True):
+    # clear()
+    draw_console()
+    time.sleep(0.01)
+# draw_squence(24)
