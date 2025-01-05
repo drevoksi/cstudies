@@ -73,4 +73,8 @@ def get_img(tone_r, tone_g, tone_b):
 
 tone_r, tone_g, tone_b = get_tones("img2.jpg", 100)
 tone_p = get_tone_pattern(tone_r, 16)
+
+# instead should be printed in CMY
 get_img(tone_p, tone_p, tone_p).show()
+
+# add rotation to dot patterns in order to better reflect real print utilises them for consistent look
