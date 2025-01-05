@@ -10,7 +10,7 @@ from random import random
 def sheet(w, h):
     return [[1] * h for i in range(w)]
 def rand_sheet(w, h):
-    return [[random() for y in range(w)] for x in range(h)]
+    return [[random() for y in range(h)] for x in range(w)]
 
 sub = ((-0.25, -0.25), (0.25, -0.25), (-0.25, 0.25), (0.25, 0.25))
 def draw_circle(tone, cx, cy, rsq):
@@ -37,14 +37,14 @@ def get_tone_pattern(tone, res):
         for ty in range(th):
             cx = tx * res + res / 2
             cy = ty * res + res / 2
-            t = tone[tx][ty]
+            t = 1 - tone[tx][ty]
             draw_circle(pattern, cx, cy, t * res * res / 2)
     return pattern
 
 from PIL import Image
 
 def get_tones(directory, targetw):
-    img = Image.open(directory)
+    img = Image.open(directory).convert("RGBA")
     r = targetw / img.width
     img = img.resize((int(img.width * r), int(img.height * r)))
     w = img.width
@@ -55,10 +55,11 @@ def get_tones(directory, targetw):
     for x in range(w):
         for y in range(h):
             col = img.getpixel((x, y))
-            tone_r[x][y] = col[0] / 255
-            tone_g[x][y] = col[1] / 255
-            tone_b[x][y] = col[2] / 255
-    print(len(tone_r), len(tone_r[0]))
+            r, g, b, a = tuple(c / 255 for c in col)
+            r, g, b = tuple(c + (1 - c) * (1 - a) for c in (r, g, b))
+            tone_r[x][y] = r
+            tone_g[x][y] = g
+            tone_b[x][y] = b
     return (tone_r, tone_g, tone_b)
 
 def get_img(tone_r, tone_g, tone_b):
@@ -70,6 +71,6 @@ def get_img(tone_r, tone_g, tone_b):
             img.putpixel((x, y), tuple(int(min(max(tone[x][y], 0), 1) * 255) for tone in (tone_r, tone_g, tone_b)))
     return img
 
-tone_r, tone_g, tone_b = get_tones("img.png", 50)
-tone_p = get_tone_pattern(tone_b, 10)
+tone_r, tone_g, tone_b = get_tones("img2.jpg", 100)
+tone_p = get_tone_pattern(tone_r, 16)
 get_img(tone_p, tone_p, tone_p).show()
