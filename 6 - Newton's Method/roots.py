@@ -16,7 +16,7 @@ def find_root(f, x, n):
             break
         dy = f(x + dx) - y
         if dy == 0:
-            x += dx
+            x += random() - 0.5
             continue
         x -= y * dx / dy
     return x
@@ -37,3 +37,9 @@ def find_root_d(f, x0 = random(), n = 20):
     return x0
 
 print(find_root_d(g, 1, 20))
+
+# inverse slope gives exactly how much x needs to be increased for a change in y value
+# in this case, the vertical value is desired to decrease to 0, thus the y-difference is -f(x)
+# ... and the increase in x is -f(x) * dx/dy
+
+# the Newton's Method adds to the old x the (negative) value of the function over its slope at that point
