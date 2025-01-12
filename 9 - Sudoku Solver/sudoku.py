@@ -209,7 +209,7 @@ def solve_col(col):
 
 def solve_box(box):
     bpos = (box % 3) * 3 + (box // 3) * 27
-    return solve_9(tuple(bpos + i + o * 9 for i in range(3) for o in range(3)))
+    return solve_9(tuple(bpos + i + o * 9 for o in range(3) for i in range(3)))
 
 for pos in range(81):
     number = start[pos]
