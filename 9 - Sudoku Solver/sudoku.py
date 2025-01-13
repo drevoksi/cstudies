@@ -34,29 +34,29 @@
 #          6, 0, 0,  0, 0, 0,  0, 0, 0,
 #          9, 0, 0,  3, 0, 0,  0, 0, 8]
 
-# start = [0, 9, 0,  7, 0, 0,  8, 0, 0,
-#          0, 0, 7,  0, 5, 0,  3, 0, 0,
-#          5, 0, 4,  0, 0, 0,  0, 0, 0,
+start = [0, 9, 0,  7, 0, 0,  8, 0, 0,
+         0, 0, 7,  0, 5, 0,  3, 0, 0,
+         5, 0, 4,  0, 0, 0,  0, 0, 0,
 
-#          0, 0, 0,  5, 0, 0,  0, 0, 4,
-#          6, 4, 0,  0, 9, 0,  0, 0, 2,
-#          0, 3, 0,  1, 0, 0,  0, 0, 6,
+         0, 0, 0,  5, 0, 0,  0, 0, 4,
+         6, 4, 0,  0, 9, 0,  0, 0, 2,
+         0, 3, 0,  1, 0, 0,  0, 0, 6,
 
-#          0, 0, 0,  0, 0, 0,  0, 0, 0,
-#          0, 6, 0,  9, 0, 0,  1, 0, 0,
-#          0, 7, 0,  0, 0, 2,  0, 0, 3]
+         0, 0, 0,  0, 0, 0,  0, 0, 0,
+         0, 6, 0,  9, 0, 0,  1, 0, 0,
+         0, 7, 0,  0, 0, 2,  0, 0, 3]
 
-start = [0, 7, 0,  0, 0, 5,  2, 9, 6,
-         0, 0, 0,  0, 0, 6,  0, 8, 1,
-         0, 0, 6,  8, 0, 0,  0, 0, 3,
+# start = [0, 7, 0,  0, 0, 5,  2, 9, 6,
+#          0, 0, 0,  0, 0, 6,  0, 8, 1,
+#          0, 0, 6,  8, 0, 0,  0, 0, 3,
 
-         0, 2, 0,  9, 0, 3,  0, 0, 0,
-         0, 8, 0,  2, 0, 0,  9, 1, 0,
-         0, 1, 0,  0, 0, 0,  0, 0, 0,
+#          0, 2, 0,  9, 0, 3,  0, 0, 0,
+#          0, 8, 0,  2, 0, 0,  9, 1, 0,
+#          0, 1, 0,  0, 0, 0,  0, 0, 0,
 
-         0, 0, 0,  0, 7, 0,  8, 6, 0,
-         5, 0, 0,  0, 0, 2,  0, 7, 0,
-         0, 6, 4,  5, 0, 0,  0, 2, 0]
+#          0, 0, 0,  0, 7, 0,  8, 6, 0,
+#          5, 0, 0,  0, 0, 2,  0, 7, 0,
+#          0, 6, 4,  5, 0, 0,  0, 2, 0]
 
 # board = [{i for i in range(1, 10)} for i in range(81)]
 # for pos in range(81):
@@ -137,26 +137,33 @@ def validate_9(positions):
 def is_single(note):
     return note == (note & (-note))
 
+def row_positions(row):
+    return (i + row * 9 for i in range(9))
+
+def col_positions(col):
+    return (col + i * 9 for i in range(9))
+
+def box_positions(box):
+    bpos = (box % 3) * 3 + (box // 3) * 27
+    return (bpos + i + o * 9 for i in range(3) for o in range(3))
+
 # to remove the possibility of a number 5 from {1, ..., 9}: bin(numbers[0] & ~numbers[5])
-def set_single_note(note, pos):
+def set_note(note, pos):
+    if board[pos] == note: return
+    board[pos] = note
+    if not is_single(note): return
     h = pos % 9
     v = pos // 9
-    row = pos - h
-    for c in range(9):
-        sub_single_note(note, row + c)
-    col = pos - v * 9
-    for c in range(9):
-        sub_single_note(note, col + c * 9)
-    box = pos - (h % 3) - (v % 3) * 9
-    for c in range(9):
-        sub_single_note(note, box + (c % 3) + (c // 3) * 9)
-    board[pos] = note
+    for c in row_positions(v):
+        if c != pos: sub_single_note(note, c)
+    for c in col_positions(h):
+        if c != pos: sub_single_note(note, c)
+    for c in box_positions((h // 3) + (v // 3) * 3):
+        if c != pos: sub_single_note(note, c)
 
 def sub_single_note(note, pos):
-    if is_single(board[pos]): return
-    board[pos] &= ~note
-    if is_single(board[pos]):
-        set_single_note(board[pos], pos)
+    if not is_single(note): print('🤨🤨🤨')
+    set_note(board[pos] & (~note), pos)
 
 def get_single_notes(note):
     single_note = 1
@@ -186,19 +193,20 @@ def solve_9(positions):
             cell_note_indexes[o] += 1
             if cell_note_indexes[o] < cell_note_lengths[o] or o == 0: break
             cell_note_indexes[o] = 0
+    # print('this time it\'s')
+    # print(list(board[pos] for pos in positions))
+    # print(cell_notes)
+    # if (cell_notes[0] == 0):
+    #     print('positions:', positions)
+    #     input()
+
     update = False
-    single_updates = [None] * 9
     for i in range(9):
         pos = positions[i]
         note = cell_notes[i]
         if board[pos] != note:
             update = True
-            if is_single(note): single_updates[i] = pos
-        board[pos] = note
-    for i in range(9):
-        pos = single_updates[i]
-        if pos != None:
-            set_single_note(board[pos], pos)
+            set_note(note, pos)
     return update
         
 def solve_row(row):
@@ -214,7 +222,7 @@ def solve_box(box):
 for pos in range(81):
     number = start[pos]
     if number != 0:
-        set_single_note(notes[number], pos)
+        set_note(notes[number], pos)
 
 def solve():
     update = True
@@ -226,6 +234,8 @@ def solve():
 # board[36] = 0b000000011
 # board[44] = 0b000000111
 # set_single_note(notes[1], 40, board)
+print_board(board)
+print()
 solve()
 print_board(board)
 print_numbers(board)
