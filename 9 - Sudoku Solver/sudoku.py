@@ -58,42 +58,6 @@ start = [0, 9, 0,  7, 0, 0,  8, 0, 0,
 #          5, 0, 0,  0, 0, 2,  0, 7, 0,
 #          0, 6, 4,  5, 0, 0,  0, 2, 0]
 
-# board = [{i for i in range(1, 10)} for i in range(81)]
-# for pos in range(81):
-#     number = start[pos]
-#     if number == 0: continue
-#     board[pos] = {number}
-
-# def solve_9(positions):
-#     change = False
-#     # not implemented
-#     return change
-
-# def solve_square(square):
-#     sp = (square % 3) * 3 + (square // 3) * 3 * 9
-#     positions = tuple(sp + i % 3 + (i // 3) * 9 for i in range(9))
-#     return solve_9(positions)
-
-# def solve_row(row):
-#     rp = row * 9
-#     positions = tuple(rp + i for i in range(9))
-#     return solve_9(positions)
-
-# def solve_column(column):
-#     positions = tuple(column + i * 9 for i in range(9))
-#     return solve_9(positions)
-
-# changed = True
-# while changed:
-#     changed = False
-#     for i in range(9):
-#         changed = changed or solve_row(i) or solve_column(i) or solve_square(i)
-
-# for i in range(9):
-#     print(board[i * 9 : i * 9 + 9])
-
-# .........
-
 notes = [0]
 notes.extend(1 << i for i in range(9))
 notes[0] = sum(notes)
@@ -193,13 +157,6 @@ def solve_9(positions):
             cell_note_indexes[o] += 1
             if cell_note_indexes[o] < cell_note_lengths[o] or o == 0: break
             cell_note_indexes[o] = 0
-    # print('this time it\'s')
-    # print(list(board[pos] for pos in positions))
-    # print(cell_notes)
-    # if (cell_notes[0] == 0):
-    #     print('positions:', positions)
-    #     input()
-
     update = False
     for i in range(9):
         pos = positions[i]
@@ -240,3 +197,14 @@ solve()
 print_board(board)
 print_numbers(board)
 validate_board(board)
+
+# 2nd example, best
+# 000000100 100000000 000100000 001000000 000001011 000001001 010000000 000001010 000010000 
+# 010000011 010000011 001000000 010101010 000010000 110101001 000000100 100101010 100000001 
+# 000010000 010000011 000001000 010100110 010100111 110100101 000100010 101100010 101000001 
+# 111000011 010000011 110000011 000010000 011100110 011100100 101000000 000000101 000001000 
+# 000100000 000001000 010010001 010000100 100000000 011000100 001010000 000000101 000000010 
+# 101000010 000000100 100010010 000000001 001001010 001001000 101010000 010000000 000100000 
+# 110001011 000010000 110000111 010101100 011101101 011101101 000101010 101101010 111000000 
+# 010001010 000100000 010000110 100000000 011001100 000010000 000000001 001001010 011000000 
+# 110001001 001000000 110000001 010101000 010101001 000000010 000101000 000010000 000000100 
