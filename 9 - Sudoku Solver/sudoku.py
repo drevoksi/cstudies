@@ -82,12 +82,11 @@ def print_numbers(board):
 def validate_board(board):
     valid = True
     for row in range(9):
-        valid &= validate_9(i + row * 9 for i in range(9))
+        valid &= validate_9(row_positions(row))
     for col in range(9):
-        valid &= validate_9(col + i * 9 for i in range(9))
+        valid &= validate_9(col_positions(col))
     for box in range(9):
-        bpos = (box % 3) * 3 + (box // 3) * 27
-        valid &= validate_9(bpos + (i % 3) + (i // 3) * 9 for i in range(9))
+        valid &= validate_9(box_positions(box))
     print("VALID" if valid else "NOT VALID")
 
 def validate_9(positions):
@@ -101,6 +100,21 @@ def validate_9(positions):
 def is_single(note):
     return note == (note & (-note))
 
+def get_single_notes(note):
+    single_note = 1
+    for i in range(9):
+        if single_note & note != 0:
+            yield single_note
+        single_note <<= 1
+
+def get_first_single_note(note):
+    single_note = 1
+    for i in range(9):
+        if single_note & note != 0:
+            return single_note
+        single_note <<= 1
+    return 0
+
 def row_positions(row):
     return (i + row * 9 for i in range(9))
 
@@ -111,30 +125,41 @@ def box_positions(box):
     bpos = (box % 3) * 3 + (box // 3) * 27
     return (bpos + i + o * 9 for i in range(3) for o in range(3))
 
+update_rows = 0
+update_cols = 0
+update_boxes = 0
+
 # to remove the possibility of a number 5 from {1, ..., 9}: bin(numbers[0] & ~numbers[5])
 def set_note(note, pos):
-    if board[pos] == note: return
+    if board[pos] == note and note != 0: return True
     board[pos] = note
-    if not is_single(note): return
+    if note == 0:
+        print("BRO IS ZERO") 
+        return False
+    global update_rows
+    global update_cols
+    global update_boxes
     h = pos % 9
     v = pos // 9
+    b = (h // 3) + (v // 3) * 3
+    update_rows |= 1 << v
+    update_cols |= 1 << h
+    update_boxes |= 1 << b
+    if not is_single(note): return True
     for c in row_positions(v):
-        if c != pos: sub_single_note(note, c)
+        if c != pos and not sub_single_note(note, c):
+            return False
     for c in col_positions(h):
-        if c != pos: sub_single_note(note, c)
-    for c in box_positions((h // 3) + (v // 3) * 3):
-        if c != pos: sub_single_note(note, c)
+        if c != pos and not sub_single_note(note, c):
+            return False
+    for c in box_positions(b):
+        if c != pos and not sub_single_note(note, c):
+            return False
+    return True
 
 def sub_single_note(note, pos):
     if not is_single(note): print('🤨🤨🤨')
-    set_note(board[pos] & (~note), pos)
-
-def get_single_notes(note):
-    single_note = 1
-    for i in range(9):
-        if single_note & note != 0:
-            yield single_note
-        single_note <<= 1
+    return set_note(board[pos] & (~note), pos)
 
 def solve_9(positions):
     cell_single_notes = tuple(tuple(get_single_notes(board[pos])) for pos in positions)
@@ -157,46 +182,94 @@ def solve_9(positions):
             cell_note_indexes[o] += 1
             if cell_note_indexes[o] < cell_note_lengths[o] or o == 0: break
             cell_note_indexes[o] = 0
-    update = False
     for i in range(9):
-        pos = positions[i]
-        note = cell_notes[i]
-        if board[pos] != note:
-            update = True
-            set_note(note, pos)
-    return update
+        if not set_note(cell_notes[i], positions[i]):
+            return False
+    return True
         
 def solve_row(row):
-    return solve_9(tuple(i + row * 9 for i in range(9)))
+    return solve_9(tuple(row_positions(row)))
 
 def solve_col(col):
-    return solve_9(tuple(col + i * 9 for i in range(9)))
+    return solve_9(tuple(col_positions(col)))
 
 def solve_box(box):
-    bpos = (box % 3) * 3 + (box // 3) * 27
-    return solve_9(tuple(bpos + i + o * 9 for o in range(3) for i in range(3)))
+    return solve_9(tuple(box_positions(box)))
 
-for pos in range(81):
-    number = start[pos]
-    if number != 0:
-        set_note(notes[number], pos)
-
-def solve():
-    update = True
-    while update:
-        update = False
+def update():
+    global update_rows
+    global update_cols
+    global update_boxes
+    while update_rows != 0 or update_cols != 0 or update_boxes != 0:
         for i in range(9):
-            update = update or solve_row(i) or solve_col(i) or solve_box(i)
+            p = 1 << i
+            if update_rows & p != 0:
+                update_rows &= ~p
+                if not solve_row(i):
+                    return False
+            if update_cols & p != 0:
+                update_cols &= ~p
+                if not solve_col(i):
+                    return False
+            if update_boxes & p != 0:
+                update_boxes &= ~p
+                if not solve_box(i):
+                    return False
+
+def solve_note(note, pos):
+    return set_note(note, pos) and update()
+
+def solve(pos = 0):
+    global board
+    while pos < 81 and is_single(board[pos]):
+        pos += 1
+    if pos == 81: return True
+    while board[pos] != 0:
+        single_note = get_first_single_note(board[pos])
+        current_board = tuple(board)
+
+        if pos == 9:
+            print_numbers(board)
+        setnoteresult = set_note(single_note, pos)
+        if setnoteresult and solve(pos + 1):
+            return True
+        
+        board = list(current_board)
+        sub_single_note(single_note, pos)
+    return False
+
+
+def fill():
+    for pos in range(81):
+        number = start[pos]
+        if number != 0:
+            set_note(notes[number], pos)
+    # update = True
+    # while update:
+    #     update = False
+    #     for i in range(9):
+    #         update = update or solve_row(i) or solve_col(i) or solve_box(i)
+    update()
+
+from time import time
+tstart = time()
 
 # board[36] = 0b000000011
 # board[44] = 0b000000111
 # set_single_note(notes[1], 40, board)
-print_board(board)
-print()
+fill()
 solve()
+# set_note(notes[1], 4)
+# print_board(board)
+# print("STEP START!!!")
+# set_note(notes[8], 9)
+# print("STEP END!!!")
 print_board(board)
 print_numbers(board)
 validate_board(board)
+
+tend = time()
+print(f'execution: {tend - tstart:.3f}s')
 
 # 2nd example, best
 # 000000100 100000000 000100000 001000000 000001011 000001001 010000000 000001010 000010000 
