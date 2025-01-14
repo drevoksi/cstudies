@@ -134,7 +134,6 @@ def set_note(note, pos):
     if board[pos] == note and note != 0: return True
     board[pos] = note
     if note == 0:
-        print("BRO IS ZERO") 
         return False
     global update_rows
     global update_cols
@@ -228,14 +227,12 @@ def solve(pos = 0):
         single_note = get_first_single_note(board[pos])
         current_board = tuple(board)
 
-        if pos == 9:
-            print_numbers(board)
-        setnoteresult = set_note(single_note, pos)
-        if setnoteresult and solve(pos + 1):
+        if set_note(single_note, pos) and solve(pos + 1):
             return True
         
         board = list(current_board)
-        sub_single_note(single_note, pos)
+        if not sub_single_note(single_note, pos):
+            return False
     return False
 
 
