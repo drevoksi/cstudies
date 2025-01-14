@@ -1,6 +1,7 @@
 # taking it further: 
 # - minimise recursion depth
 # - generalise for n-sized sudoku, not just size 3
+# - sudoku generator 
 
 # consider the case when there are two cells with notes [3, 7], [3, 7] in a square
 # you can't tell where exactly 3 or 7 will be, but it must be in one of those two cells
@@ -38,17 +39,17 @@
 #          6, 0, 0,  0, 0, 0,  0, 0, 0,
 #          9, 0, 0,  3, 0, 0,  0, 0, 8]
 
-# start = [0, 9, 0,  7, 0, 0,  8, 0, 0,
-#          0, 0, 7,  0, 5, 0,  3, 0, 0,
-#          5, 0, 4,  0, 0, 0,  0, 0, 0,
+start = [0, 9, 0,  7, 0, 0,  8, 0, 0,
+         0, 0, 7,  0, 5, 0,  3, 0, 0,
+         5, 0, 4,  0, 0, 0,  0, 0, 0,
 
-#          0, 0, 0,  5, 0, 0,  0, 0, 4,
-#          6, 4, 0,  0, 9, 0,  0, 0, 2,
-#          0, 3, 0,  1, 0, 0,  0, 0, 6,
+         0, 0, 0,  5, 0, 0,  0, 0, 4,
+         6, 4, 0,  0, 9, 0,  0, 0, 2,
+         0, 3, 0,  1, 0, 0,  0, 0, 6,
 
-#          0, 0, 0,  0, 0, 0,  0, 0, 0,
-#          0, 6, 0,  9, 0, 0,  1, 0, 0,
-#          0, 7, 0,  0, 0, 2,  0, 0, 3]
+         0, 0, 0,  0, 0, 0,  0, 0, 0,
+         0, 6, 0,  9, 0, 0,  1, 0, 0,
+         0, 7, 0,  0, 0, 2,  0, 0, 3]
 
 # start = [0, 7, 0,  0, 0, 5,  2, 9, 6,
 #          0, 0, 0,  0, 0, 6,  0, 8, 1,
@@ -62,17 +63,17 @@
 #          5, 0, 0,  0, 0, 2,  0, 7, 0,
 #          0, 6, 4,  5, 0, 0,  0, 2, 0]
 
-start = [2, 0, 0,  0, 0, 0,  0, 0, 7,
-         0, 0, 3,  7, 4, 0,  0, 0, 1,
-         9, 0, 0,  8, 0, 0,  0, 0, 4,
+# start = [2, 0, 0,  0, 0, 0,  0, 0, 7,
+#          0, 0, 3,  7, 4, 0,  0, 0, 1,
+#          9, 0, 0,  8, 0, 0,  0, 0, 4,
 
-         0, 0, 0,  0, 2, 7,  0, 0, 0,
-         0, 0, 2,  0, 0, 6,  8, 0, 0,
-         6, 0, 0,  3, 0, 4,  5, 0, 0,
+#          0, 0, 0,  0, 2, 7,  0, 0, 0,
+#          0, 0, 2,  0, 0, 6,  8, 0, 0,
+#          6, 0, 0,  3, 0, 4,  5, 0, 0,
 
-         0, 0, 0,  0, 0, 0,  0, 0, 0,
-         0, 1, 0,  6, 0, 0,  0, 0, 8,
-         3, 0, 0,  4, 0, 0,  9, 0, 0]
+#          0, 0, 0,  0, 0, 0,  0, 0, 0,
+#          0, 1, 0,  6, 0, 0,  0, 0, 8,
+#          3, 0, 0,  4, 0, 0,  9, 0, 0]
 
 notes = [0]
 notes.extend(1 << i for i in range(9))
@@ -124,12 +125,7 @@ def get_single_notes(note):
         single_note <<= 1
 
 def get_first_single_note(note):
-    single_note = 1
-    for i in range(9):
-        if single_note & note != 0:
-            return single_note
-        single_note <<= 1
-    return 0
+    return next(get_single_notes(note))
 
 def row_positions(row):
     return (i + row * 9 for i in range(9))
@@ -191,12 +187,9 @@ def fill():
 from time import time
 tstart = time()
 
-# board[36] = 0b000000011
-# board[44] = 0b000000111
-# set_single_note(notes[1], 40, board)
 fill()
 solve()
-print_board(board)
+# print_board(board)
 print_numbers(board)
 validate_board(board)
 
