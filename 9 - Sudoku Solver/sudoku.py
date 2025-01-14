@@ -1,7 +1,10 @@
+# solves an extreme sudoku(3) in under 0.011s
+
 # taking it further: 
-# - minimise recursion depth
 # - generalise for n-sized sudoku, not just size 3
-# - sudoku generator 
+# - find all possible solutions in solve(), solve(all = true)?
+#   e.g., add found solution to a list, but pretend it's wrong and continue search
+# - generate sudoku
 
 # consider the case when there are two cells with notes [3, 7], [3, 7] in a square
 # you can't tell where exactly 3 or 7 will be, but it must be in one of those two cells
