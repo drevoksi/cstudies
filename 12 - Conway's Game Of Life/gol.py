@@ -27,7 +27,7 @@ def iterate():
             if (dy | dx) != 0:
                 cx = x + dx
                 cy = y + dy
-                if cx >= 0 and cx < len(counts) and cy >= 0 and cy < len(counts[0]):
+                if 0 <= cx < len(counts) and 0 <= cy < len(counts[0]):
                     counts[cx][cy] += 1
     for x, y in ((x, y) for y in range(h) for x in range(w)):
         count = counts[x][y]
