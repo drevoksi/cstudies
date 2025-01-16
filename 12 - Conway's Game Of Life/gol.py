@@ -25,6 +25,7 @@ def iterate():
         if not board[x][y]: continue
         for dx, dy in ((dx, dy) for dy in range(-1, 2) for dx in range(-1, 2)):
             if (dy | dx) != 0:
+                # can be declared inside the if statement with :=
                 cx = x + dx
                 cy = y + dy
                 if 0 <= cx < len(counts) and 0 <= cy < len(counts[0]):
