@@ -5,7 +5,7 @@
 
 # this solution follows concepts of dynamic programming, as only a single line array is being utilised
 # key to the problem itself is realising the number of ways to reach a square
-# ... is the sum of the number of ways to reach the square above and the number of ways to reach the square to the left
+# ... is the sum of the number of ways to reach the square above and ways to reach the square to the left
 
 def unique_paths(grid):
     line = [0] * len(grid[0])
