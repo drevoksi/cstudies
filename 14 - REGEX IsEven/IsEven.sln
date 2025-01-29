@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "14 - REGEX IsEven", "14 - REGEX IsEven", "{219F620F-2BE3-4288-8712-E68D867FF5B4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IsEven", "IsEven", "{219F620F-2BE3-4288-8712-E68D867FF5B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsEven", "14 - REGEX IsEven\IsEven\IsEven.csproj", "{E443C02E-DB64-4CA1-ADD2-B2B31A1D8B22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsEven", "IsEven\IsEven.csproj", "{E443C02E-DB64-4CA1-ADD2-B2B31A1D8B22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
