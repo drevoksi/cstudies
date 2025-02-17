@@ -1,2 +1,2 @@
 # cstudies
-I explore different maths and algoritms I can code
+I explore maths and algorithms in code
