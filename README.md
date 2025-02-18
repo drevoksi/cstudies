@@ -1,2 +1,2 @@
 # cstudies
-I explore maths and algorithms in code
+Maths, algorithms and coding ideas to explore!
